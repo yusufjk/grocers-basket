@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:security="http://www.springframework.org/schema/security"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+                    http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+             http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd">
+          
+          <context:component-scan base-package="com.grocersbasket"/>
+
+
+<bean id="passwordEncoder" 
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+<security:http pattern="/webapp/css/**" security="none"/>
+<security:http pattern="/webapp/img/**" security="none"/>
+<security:http pattern="/webapp/fonts/**" security="none"/>
+<security:http pattern="/webapp/js/**" security="none"/>
+
+
+
+
+
+           <security:http auto-config="true">
+           
+          
+        <security:intercept-url pattern="/admin/**" access="hasAuthority('admin')" />
+        <security:intercept-url pattern="/cart/**" access="hasAuthority('user')" />
+        <security:intercept-url pattern="/**" access="permitAll" />
+                      <security:form-login login-page="/login" 
+                      username-parameter="uemail"
+                     password-parameter="upassword"  />  
+				
+<!-- 
+ 					
+                     authentication-failure-forward-url="/login?error=invalid" 
+                     authentication-success-forward-url="/index"/>-->   
+                        
+                        <security:csrf disabled="true"/>                
+             <security:access-denied-handler
+                     error-page="/access-denied" /> 
+             
+ 
+              <security:logout invalidate-session="true" logout-success-url="/login?logout" />
+       </security:http>
+       <security:authentication-manager> 
+              <security:authentication-provider>
+              <security:password-encoder ref="passwordEncoder"/>
+                     <security:jdbc-user-service
+                           data-source-ref="dataSource"
+                           users-by-username-query="select uemail, upassword, 'TRUE' as enabled from USER where uemail=?"
+                           authorities-by-username-query="select uemail, role from USER where uemail=?" />
+              </security:authentication-provider>
+       </security:authentication-manager>
+   
+</beans>
